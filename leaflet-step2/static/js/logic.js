@@ -61,7 +61,7 @@ function createFeatures(earthquakeData, tectonicplatesData) {
     var tectonicplates = L.geoJSON(tectonicplatesData, 
         {
             color: "orange",
-            fillColor:"#000",
+            fillColor: "#ffffff00",
             weight: 1
         }
     );
@@ -80,7 +80,7 @@ function createFeatures(earthquakeData, tectonicplatesData) {
 
 function createMap(earthquakes, tectonicplates) {
 
-    // Define lightmap
+    // Define map styles
     var lightmap = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
     attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
     maxZoom: 18,
@@ -138,6 +138,30 @@ function createMap(earthquakes, tectonicplates) {
   // Add the layer control to the map
   L.control.layers(baseMaps, overlayMaps).addTo(map);
 
+  // To activate the tool tip after user deselect and select Fault Lines Overlay layer
+  map.on('overlayadd', function(ol) {
+    //   console.log("Inside overload add function...");
+    //   console.log("Name:", ol.name);
+      if (ol.name === 'Fault Lines') {
+        // console.log("detecting tectonicplates overload add...");
+        this.removeLayer(earthquakes);
+        this.addLayer(earthquakes);
+      }
+  });
+
+  map.on("baselayerchange", function(bl) {
+      console.log("Base Map layer changed", bl.name);
+      if (bl.name === "Grayscale" || bl.name == "Outdoors") {
+          lineColor = "red";
+          tectonicplates.setStyle({color: lineColor});
+      }
+      else {
+          lineColor = "orange";
+          tectonicplates.setStyle({color: lineColor});
+      };
+      console.log(lineColor);
+  });
+
   // Set up the legend
   var colors = ["#40e305", "#c2e305", "#edce05", "#e3a549",  "#c45704", "#e02716"];
   var legend = L.control({position: "bottomright"});
@@ -159,7 +183,8 @@ function createMap(earthquakes, tectonicplates) {
 
     };
 
-  // Adding legent to the map
-  legend.addTo(map);
+    // Adding legent to the map
+    legend.addTo(map);
 
 };
+
